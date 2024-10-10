@@ -1,0 +1,23 @@
+apiVersion: core/v1
+kind: Pod
+metadata:
+  name: jupyterhub-slurm
+spec:
+  containers:
+    - name: jupyterhub
+      image: localhost/brics_jupyterhub:latest
+      command: ["jupyterhub"]
+      args: ["--debug"]
+      ports:
+        - containerPort: 8000
+          hostIP: 127.0.0.1
+          hostPort: 8000
+          protocol: TCP
+
+    # TODO Add Slurm container
+    #- name: Slurm
+    #  image: ...
+
+
+
+
