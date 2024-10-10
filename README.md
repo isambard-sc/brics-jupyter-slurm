@@ -162,3 +162,36 @@ $scontrol update NodeName=localhost State=RESUME Reason="Manual clear of drain s
    # Delete untracked files
    git clean -x -d --force
    ```
+
+## Multi-container setup
+
+Create an environment where JupyterHub and Slurm run in separate containers and interact over the network, e.g. JupyterHub container connects to Slurm container via SSH to run job management tasks.
+
+### Design
+
+#### Base images
+
+* JupyterHub: [jupyterhub](https://github.com/jupyterhub/jupyterhub), <https://quay.io/repository/jupyterhub/jupyterhub> 
+* Slurm: [Docker-Slurm](https://github.com/owhere/docker-slurm), <https://hub.docker.com/r/nathanhess/slurm>
+
+#### Configuration and logging data outside of containers
+
+As above, bind mount directories/volumes outside of the container to configure and customise the behaviour of the images.
+
+#### Minimal modify of base images
+
+Modify the JupyterHub and Slurm base images as little as possible to enable them to interact, e.g. install SSH client/server packages.
+
+#### JupyterHub connects to Slurm over SSH
+
+To run Slurm job management commands required for [batchspawner](https://github.com/jupyterhub/batchspawner/) (`sbatch`, `squeue`, `scancel`), JupyterHub will connect to the Slurm container via SSH. This will allow the JupyterHub container to be easily reused with other (non-containerised) Slurm instances in production, simply by configuring an SSH connection.
+
+#### Kubernetes-like deployment in `podman` pod
+
+Use [`podman kube play`](https://docs.podman.io/en/stable/markdown/podman-kube-play.1.html) to enable multi-container deployment in a `podman pod` using a Kubernetes manifest.
+
+This should enable the solution to be easily adapted for deployment in a Kubernetes environment in the future.
+
+### Try it!
+
+TODO
