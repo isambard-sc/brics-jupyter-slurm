@@ -2,4 +2,6 @@ FROM docker.io/nathanhess/slurm:full-root
 
 RUN echo "Hello, world"
 
+# TODO Install and configure SSH server
+
 CMD ["/bin/sh", "-c", "/etc/startup.sh; tail -f /var/log/slurmctld.log"]
