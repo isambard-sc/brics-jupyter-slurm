@@ -14,9 +14,8 @@ spec:
           hostPort: 8000
           protocol: TCP
 
-    # TODO Add Slurm container
-    #- name: Slurm
-    #  image: ...
+    - name: slurm
+      image: localhost/brics_slurm:latest
 
 
 
