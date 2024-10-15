@@ -6,8 +6,6 @@ spec:
   containers:
     - name: jupyterhub
       image: localhost/brics_jupyterhub:latest
-      command: ["jupyterhub"]
-      args: ["--debug"]
       ports:
         - containerPort: 8000
           hostIP: 127.0.0.1
@@ -16,7 +14,3 @@ spec:
 
     - name: slurm
       image: localhost/brics_slurm:latest
-
-
-
-
