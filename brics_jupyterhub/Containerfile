@@ -1,3 +1,17 @@
 FROM quay.io/jupyterhub/jupyterhub:latest
 
-RUN echo "Hello, world"
+# Install packages: SSH client
+RUN <<EOF
+apt-get update && apt-get install --assume-yes --no-install-recommends \
+  openssh-client
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+EOF
+
+# Set useful environment variables
+ENV JUPYTERHUB_CONFIG_DIR="/etc/jupyterhub" \
+JUPYTERHUB_SRV_DIR="/srv/jupyterhub" \
+JUPYTERHUB_LOG_DIR="/var/log/jupyterhub" \
+JUPYTERHUB_LAUNCHER="/usr/local/bin/start-jupyterhub"
+
+CMD ["jupyterhub", "--debug"]
