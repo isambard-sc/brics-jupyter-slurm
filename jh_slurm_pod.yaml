@@ -12,40 +12,29 @@ spec:
           hostPort: 8000
           protocol: TCP
       volumeMounts:
-        - name: jupyterhub_config_file
+        - name: jupyterhub_root_vol
           mountPath: /etc/jupyterhub/jupyterhub_config.py
-          readOnly: true 
+          readOnly: true
+          subPath: /etc/jupyterhub/jupyterhub_config.py
+
+        - name: jupyterhub_root_vol
+          mountPath: /srv/jupyterhub
+          readOnly: false
+          subPath: /srv/jupyterhub
+
+        - name: jupyterhub_root_vol
+          mountPath: /var/log/jupyterhub
+          readOnly: false
+          subPath: /var/log/jupyterhub
 
     - name: slurm
       image: localhost/brics_slurm:latest
 
   volumes:
-    - name: jupyterhub_config_file
-      hostPath:
-        path: ./jupyter_config/jupyterhub_pod_config.py
-        type: File
+    - name: jupyterhub_root_vol
+      persistentVolumeClaim:
+        claimName: jupyterhub_root
+        readOnly: false
 
-    - name: jupyterhub_log_dir
-      hostPath:
-        path: ./jupyter_logs
-        type: Directory
 
-    - name: jupyterhub_srv_dir
-      hostPath:
-        path: ./jupyter_srv
-        type: Directory
-
-    - name: slurm_config_file
-      hostPath:
-        path: ./slurm_config/slurm.conf
-        type: File
-
-    - name: slurm_log_dir
-      hostPath:
-        path: ./slurm_logs
-        type: Directory
-
-    - name: slurm_spool_dir
-      hostPath: 
-        path: ./slurm_spool
-        type: Directory
+ 
