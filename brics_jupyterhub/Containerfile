@@ -42,4 +42,6 @@ cd "${JUPYTERHUB_CONFIG_DIR}"
 jupyterhub --generate-config
 EOF
 
+WORKDIR ${JUPYTERHUB_SRV_DIR}
+
 CMD ["start-jupyterhub", "--debug"]
