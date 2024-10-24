@@ -1,21 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# To inspect contents of volume (extract into current directory)
-# macOS
-#   podman machine ssh podman volume export jupyterhub_root | tar --extract --verbose
-# Linux
-#   podman volume export jupyterhub_root | tar --extract --verbose
-
-# To tear down pod
-#   podman kube down jh_slurm_pod.yaml 
-# or
-#   podman pod stop jupyterhub-slurm
-#   podman pod rm jupyterhub-slurm
-
-# To remove volume
-#   podman volume rm jupyterhub_root_vol
-
 USAGE='./jh_slurm_pod.sh {up|down}'
 
 function bring_pod_up {

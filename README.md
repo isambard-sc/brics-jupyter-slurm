@@ -195,3 +195,40 @@ This should enable the solution to be easily adapted for deployment in a Kuberne
 ### Try it!
 
 TODO
+
+### Useful commands
+
+To inspect contents of a podman named volume `jupyterhub_root` (extracts contents into current directory):
+
+- On macOS (using a podman machine VM)
+
+  ```shell
+  podman machine ssh podman volume export jupyterhub_root | tar --extract --verbose
+  ```
+
+- On Linux (without a podman machine VM)
+
+  ```shell
+  podman volume export jupyterhub_root | tar --extract --verbose
+  ```
+
+To tear down the pod manually (without the launcher script):
+
+- Based on the K8s YAML manifest `jh_slurm_pod.yaml`
+
+  ```shell
+  podman kube down jh_slurm_pod.yaml 
+  ```
+
+- Without the manifest (pod is named `jupyterhub-slurm`)
+
+  ```shell
+  podman pod stop jupyterhub-slurm
+  podman pod rm jupyterhub-slurm
+  ```
+
+To manually remove a named volume `jupyterhub_root` (without the launcher script):
+
+```shell
+podman volume rm jupyterhub_root
+```
