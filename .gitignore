@@ -12,3 +12,5 @@ jupyter_notebooks/*
 
 jupyter_config/jupyterhub_cookie_secret
 jupyter_config/jupyterhub.sqlite
+
+/_build_tmp/

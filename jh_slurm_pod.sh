@@ -3,6 +3,29 @@ set -euo pipefail
 
 USAGE='./jh_slurm_pod.sh {up|down}'
 
+function make_ssh_key_secret {
+  # Makes a temporary directory under ./_build_tmp, creates an SSH key in this 
+  # directory, outpus a K8s manifest for a Secret containing the key data 
+  # then deletes the temporary directory and key
+  mkdir -p -v _build_tmp/
+  BUILD_TMPDIR=$(mktemp -d _build_tmp/jh_slurm_pod.XXXXXXXXXX)
+  ssh-keygen -t ed25519 -f ${BUILD_TMPDIR}/ssh_key -N "" -C "JupyterHub-Slurm dev environment"
+  cat <<EOF
+apiVersion: core/v1
+kind: Secret
+metadata:
+  name: jupyterspawner-ssh-key
+spec:
+  stringData:
+    ssh_key: |
+$(cat ${BUILD_TMPDIR}/ssh_key | sed -E -e 's/^/      /')
+    ssh_key.pub: |
+$(cat ${BUILD_TMPDIR}/ssh_key.pub | sed -E -e 's/^/      /')
+  immutable: true
+EOF
+  rm -r -v "${BUILD_TMPDIR}"
+}
+
 function bring_pod_up {
   # Build local container images
   podman build -t brics_jupyterhub ./brics_jupyterhub
