@@ -11,9 +11,6 @@ import sys
 #   repository
 sys.path.append(str(Path(__file__).parent))
 
-from tornado import web
-from typing import Callable
-from traitlets import default
 import batchspawner  # Even though not used, needed to register batchspawner interface
 
 from bricsspawner import BricsSlurmSpawner
