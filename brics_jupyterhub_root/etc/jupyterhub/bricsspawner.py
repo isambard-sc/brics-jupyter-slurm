@@ -107,6 +107,7 @@ def interpret_form_data(form_data, valid_projects):
         raise ValueError(f"Invalid spawner options input: {str(e)}")
 
     return defused_options
+
 class BricsSlurmSpawner(batchspawner.SlurmSpawner):
     """
     BriCS-specific specialisation of :class:`SlurmSpawner`
