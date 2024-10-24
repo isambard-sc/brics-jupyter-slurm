@@ -12,16 +12,19 @@ spec:
           hostPort: 8000
           protocol: TCP
       volumeMounts:
+        # JupyterHub configuration
         - name: jupyterhub_root_vol
-          mountPath: /etc/jupyterhub/jupyterhub_config.py
+          mountPath: /etc/jupyterhub
           readOnly: true
-          subPath: /etc/jupyterhub/jupyterhub_config.py
+          subPath: /etc/jupyterhub
 
+        # JupyterHub logs
         - name: jupyterhub_root_vol
           mountPath: /srv/jupyterhub
           readOnly: false
           subPath: /srv/jupyterhub
 
+        # JupyterHub server data
         - name: jupyterhub_root_vol
           mountPath: /var/log/jupyterhub
           readOnly: false
