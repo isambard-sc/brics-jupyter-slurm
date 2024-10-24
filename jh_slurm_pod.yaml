@@ -18,17 +18,22 @@ spec:
           readOnly: true
           subPath: /etc/jupyterhub
 
-        # JupyterHub logs
+        # JupyterHub server data
         - name: jupyterhub_root_vol
           mountPath: /srv/jupyterhub
           readOnly: false
           subPath: /srv/jupyterhub
 
-        # JupyterHub server data
+        # JupyterHub logs
         - name: jupyterhub_root_vol
           mountPath: /var/log/jupyterhub
           readOnly: false
           subPath: /var/log/jupyterhub
+
+        # SSH key from Secret
+        - name: ssh_key_vol
+          mountPath: /srv/jupyterhub/ssh
+          readOnly: true
 
     - name: slurm
       image: localhost/brics_slurm:latest
@@ -38,6 +43,11 @@ spec:
       persistentVolumeClaim:
         claimName: jupyterhub_root
         readOnly: false
+
+    - name: ssh_key_vol
+      secret:
+        secretName: jupyterhub-slurm-ssh-key
+
 
 
  

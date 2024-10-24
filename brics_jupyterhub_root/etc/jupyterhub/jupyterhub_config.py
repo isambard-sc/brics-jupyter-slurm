@@ -53,7 +53,7 @@ def get_ssh_key_file() -> Path:
         raise RuntimeError("Environment variable JUPYTERHUB_SRV_DIR must be set") from e
 
     try:
-        return (Path(srv_dir) / "ssh_key").resolve(strict=True)
+        return (Path(srv_dir) / "ssh" / "ssh_key").resolve(strict=True)
     except FileNotFoundError as e:
         raise RuntimeError(f"SSH private key not found at expected location") from e
 
