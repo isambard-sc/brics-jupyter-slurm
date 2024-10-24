@@ -31,6 +31,14 @@ RUN cat > "${JUPYTERHUB_LAUNCHER}" <<"EOF" && chmod --verbose u=rwx,g=rx,o=rx "$
 cd "${JUPYTERHUB_SRV_DIR}"
 JUPYTERHUB_CONFIG_FILE="${JUPYTERHUB_CONFIG_DIR}/jupyterhub_config.py"
 JUPYTERHUB_LOG_FILE="${JUPYTERHUB_LOG_DIR}/jupyterhub_log_$(date +%Y%m%d-%H%M%S).log"
+JUPYTERHUB_CRYPT_KEY_FILE="${JUPYTERHUB_SRV_DIR}/jupyterhub_crypt_key"
+
+if [[ ! -f "$JUPYTERHUB_CRYPT_KEY_FILE" ]]; then
+  # Generate new encryption key and write to file
+  echo "Generating new JupyterHub crypt key..."
+  openssl rand -hex 32 > "$JUPYTERHUB_CRYPT_KEY_FILE"
+fi
+export JUPYTERHUB_CRYPT_KEY=$(<${JUPYTERHUB_CRYPT_KEY_FILE})
 
 set -x
 exec /usr/local/bin/jupyterhub -f "${JUPYTERHUB_CONFIG_FILE}" "$@" 2>&1 | tee "${JUPYTERHUB_LOG_FILE}"
