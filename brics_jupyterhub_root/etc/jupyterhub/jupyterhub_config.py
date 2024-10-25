@@ -15,10 +15,52 @@ sys.path.append(str(Path(__file__).parent))
 
 import batchspawner  # Even though not used, needed to register batchspawner interface
 from bricsspawner import BricsSlurmSpawner
+from jupyterhub.auth import DummyAuthenticator
+
+# BricsAuthenticator passes the decoded projects claim from the received JWT
+# to BricsSpawner via auth_state (see https://jupyterhub.readthedocs.io/en/latest/reference/authenticators.html#authentication-state
+# and https://github.com/isambard-sc/bricsauthenticator/blob/main/src/bricsauthenticator/bricsauthenticator.py).
+# DUMMY_AUTH_STATE is a fixed dictionary which looks like a decoded project
+# claim that DummyBricsAuthenticator.authenticate() can return as auth_state to
+# mock the behaviour of BricsAuthenticator without receiving a JWT.
+DUMMY_AUTH_STATE={
+    "project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
+    "project1": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
+    "another_project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
+    "also-a-project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
+}
+
+class DummyBricsAuthenticator(DummyAuthenticator):
+    """
+    Extends DummyAuthenticator to add auth_state to authenticated user data
+
+    This can be used in place of BricsAuthenticator when testing BricsSlurmSpawner
+    (which expects auth_state) in a context where HTTP requests do not contain
+    valid JWTs
+    """
+    async def authenticate(self, handler, data):
+        """
+        Return username from parent .authenticate() with dummy auth_state
+        """
+        return dict(name=await super().authenticate(handler, data), auth_state=DUMMY_AUTH_STATE)
+
+# Use BriCS-customised Authenticator class (registered as entry point by
+# bricsauthenticator package)
+#c.JupyterHub.authenticator_class = "brics"
+
+# Use DummyAuthenticator extended to provide mock auth_state to BricsSlurmSpawner
+c.JupyterHub.authenticator_class = DummyBricsAuthenticator
+
+# TODO Restrict allowed usernames to a list of dummy users, e.g. using 
+#   allowed_users configuration attribute. Then the product of the allowed users
+#   and projects in DUMMY_AUTH_STATE can be used to create project-specific test
+#   accounts in the Slurm container
 
 # Don't shut down single-user servers when Hub is shut down. This allows the hub
 # to restart and reconnect to running user servers
 c.JupyterHub.cleanup_servers = False
+
+
 
 # Use BriCS-customised SlurmSpawner class
 c.JupyterHub.spawner_class = BricsSlurmSpawner
