@@ -60,8 +60,6 @@ c.JupyterHub.authenticator_class = DummyBricsAuthenticator
 # to restart and reconnect to running user servers
 c.JupyterHub.cleanup_servers = False
 
-
-
 # Use BriCS-customised SlurmSpawner class
 c.JupyterHub.spawner_class = BricsSlurmSpawner
 
