@@ -43,6 +43,15 @@ function bring_pod_up {
   else
     tar --cd brics_jupyterhub_root/ --create --file - . | podman volume import jupyterhub_root -
   fi
+
+  # Create podman named volume containing Slurm data
+  podman volume create slurm_root
+  if [[ $(uname) == "Darwin" ]]; then
+    # podman volume import not available using remote client, so run podman inside VM
+    tar --cd brics_slurm_root/ --create --file - . | podman machine ssh podman volume import slurm_root -
+  else
+    tar --cd brics_slurm_root/ --create --file - . | podman volume import slurm_root -
+  fi
   
   # Create combined manifest file with Secret and Pod
   cat > ${BUILD_TMPDIR}/combined.yaml <<EOF
@@ -66,6 +75,9 @@ function tear_pod_down {
 
   # Delete podman named volume containing JupyterHub data
   podman volume rm jupyterhub_root
+
+  # Delete podman named volume containing Slurm data
+  podman volume rm slurm_root
 
   # Delete podman secret containing SSH key
   podman secret rm jupyterhub-slurm-ssh-key

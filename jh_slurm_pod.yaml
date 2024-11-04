@@ -38,10 +38,40 @@ spec:
     - name: slurm
       image: localhost/brics_slurm:latest
 
+      volumeMounts:
+        # slurmctld log file
+        - name: slurm_root_vol
+          mountPath: /var/log/slurmctld.log
+          readOnly: false
+          subPath: /var/log/slurmctld.log
+
+        # slurmd log file
+        - name: slurm_root_vol
+          mountPath: /var/log/slurmd.log
+          readOnly: false
+          subPath: /var/log/slurmd.log
+
+        # slurmctld spool directory
+        - name: slurm_root_vol
+          mountPath: /var/spool/slurmctld
+          readOnly: false
+          subPath: /var/spool/slurmctld
+
+        # slurmd spool directory
+        - name: slurm_root_vol
+          mountPath: /var/spool/slurmd
+          readOnly: false
+          subPath: /var/spool/slurmd
+
   volumes:
     - name: jupyterhub_root_vol
       persistentVolumeClaim:
         claimName: jupyterhub_root
+        readOnly: false
+
+    - name: slurm_root_vol
+      persistentVolumeClaim:
+        claimName: slurm_root
         readOnly: false
 
     - name: ssh_key_vol
