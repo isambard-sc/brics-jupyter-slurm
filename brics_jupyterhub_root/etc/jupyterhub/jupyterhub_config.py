@@ -14,15 +14,26 @@ import sys
 sys.path.append(str(Path(__file__).parent))
 
 import batchspawner  # Even though not used, needed to register batchspawner interface
+from bricsauthenticator import BricsAuthenticator
 from bricsspawner import BricsSlurmSpawner
-from jupyterhub.auth import DummyAuthenticator
+from jupyterhub.handlers import BaseHandler
 
-# BricsAuthenticator passes the decoded projects claim from the received JWT
-# to BricsSpawner via auth_state (see https://jupyterhub.readthedocs.io/en/latest/reference/authenticators.html#authentication-state
-# and https://github.com/isambard-sc/bricsauthenticator/blob/main/src/bricsauthenticator/bricsauthenticator.py).
-# DUMMY_AUTH_STATE is a fixed dictionary which looks like a decoded project
-# claim that DummyBricsAuthenticator.authenticate() can return as auth_state to
-# mock the behaviour of BricsAuthenticator without receiving a JWT.
+# BricsAuthenticator decodes claims from the JWT received in HTTP headers,
+# uses the short_name claim from the received JWT as the username of the
+# authenticated user, and passes the projects claim from the received JWT
+# to BricsSpawner via auth_state. See
+#
+# * https://jupyterhub.readthedocs.io/en/latest/reference/authenticators.html#authentication-state
+# * https://github.com/isambard-sc/bricsauthenticator/blob/main/src/bricsauthenticator/bricsauthenticator.py
+
+# DUMMY_USERNAME is a fixed username which looks like a decoded short_name claim
+# that can be passed to the Spawner class as auth_state to mock the behaviour of
+# BricsAuthenticator without receiving a JWT.
+DUMMY_USERNAME="testuser"
+
+# DUMMY_AUTH_STATE is a fixed dictionary which looks like a decoded project claim
+# that can be passed to the Spawner class as auth_state to mock the behaviour of
+# BricsAuthenticator without receiving a JWT.
 DUMMY_AUTH_STATE={
     "project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
     "project1": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
@@ -30,19 +41,26 @@ DUMMY_AUTH_STATE={
     "also-a-project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
 }
 
-class DummyBricsAuthenticator(DummyAuthenticator):
+class DummyBricsLoginHandler(BaseHandler):
     """
-    Extends DummyAuthenticator to add auth_state to authenticated user data
+    Handler with dummy get() that authenticates with a fixed username and auth_state
+    """
+    async def get(self):
+        user = await self.auth_to_user({"name": DUMMY_USERNAME, "auth_state": DUMMY_AUTH_STATE})
+        self.set_login_cookie(user)
+        next_url = self.get_next_url(user)
+        self.redirect(next_url)
 
+class DummyBricsAuthenticator(BricsAuthenticator):
+    """
+    Replaces login page handler for BricsAuthenticator with a handler with dummy get method
+    
     This can be used in place of BricsAuthenticator when testing BricsSlurmSpawner
     (which expects auth_state) in a context where HTTP requests do not contain
     valid JWTs
     """
-    async def authenticate(self, handler, data):
-        """
-        Return username from parent .authenticate() with dummy auth_state
-        """
-        return dict(name=await super().authenticate(handler, data), auth_state=DUMMY_AUTH_STATE)
+    def get_handlers(self, app):
+        return [(r"/login", DummyBricsLoginHandler)]
 
 # Use BriCS-customised Authenticator class (registered as entry point by
 # bricsauthenticator package)
