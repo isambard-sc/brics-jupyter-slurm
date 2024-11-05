@@ -51,28 +51,38 @@ function bring_pod_up {
   podman volume create jupyterhub_root
   if [[ $(uname) == "Darwin" ]]; then
     # podman volume import not available using remote client, so run podman inside VM
+    # BSD tar
     tar --cd brics_jupyterhub_root/ --create \
       --exclude .gitkeep \
       --uname ${JUPYTERUSER} --uid ${JUPYTERUSER_UID} \
       --gname ${JUPYTERGROUP} --gid ${JUPYTERGROUP_GID} \
       --file - . | podman machine ssh podman volume import jupyterhub_root -
   else
-    # TODO update GNU tar command to exclude .gitkeep and set UID/GID for files in archive
-    tar --cd brics_jupyterhub_root/ --create --file - . | podman volume import jupyterhub_root -
+    # GNU tar
+    tar -C brics_jupyterhub_root/ --create \
+      --exclude .gitkeep \
+      --owner=${JUPYTERUSER}:${JUPYTERUSER_UID} \
+      --group=${JUPYTERGROUP}:${JUPYTERGROUP_GID} \
+      --file - . | podman volume import jupyterhub_root -
   fi
 
   # Create podman named volume containing Slurm data
   podman volume create slurm_root
   if [[ $(uname) == "Darwin" ]]; then
     # podman volume import not available using remote client, so run podman inside VM
+    # BSD tar
     tar --cd brics_slurm_root/ --create \
       --exclude .gitkeep \
       --uname ${SLURMUSER} --uid ${SLURMUSER_UID} \
       --gname ${SLURMGROUP} --gid ${SLURMGROUP_GID} \
       --file - . | podman machine ssh podman volume import slurm_root -
   else
-    # TODO update GNU tar command to exclude .gitkeep and set UID/GID for files in archive
-    tar --cd brics_slurm_root/ --create --file - . | podman volume import slurm_root -
+    # GNU tar
+    tar -C brics_slurm_root/ --create \
+      --exclude .gitkeep \
+      --owner=${SLURMUSER}:${SLURMUSER_UID} \
+      --group=${SLURMGROUP}:${SLURMGROUP_GID} \
+      --file - . | podman volume import slurm_root -
   fi
   
   # Create combined manifest file with Secret and Pod
