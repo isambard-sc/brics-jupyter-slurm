@@ -1,7 +1,20 @@
 FROM docker.io/nathanhess/slurm:full-root
 
-RUN echo "Hello, world"
+# Install OpenSSH server package from distribution repos and remove
+# auto-generated SSH host keys. SSH host keys should be generated on container
+# startup or mounted into the container to prevent fixed keys from being baked
+# into the container image.
+RUN <<EOF
+apt-get update && apt-get install --assume-yes --no-install-recommends \
+  openssh-server
+apt-get clean
+rm -rf /var/lib/apt/lists/*
+rm /etc/ssh/ssh_host_*
+EOF
 
-# TODO Install and configure SSH server
+# Update sshd config to prevent password authentication
+RUN cat > /etc/ssh/sshd_config.d/disable_password_authentication.conf <<EOF
+PasswordAuthentication no
+EOF
 
-CMD ["/bin/sh", "-c", "/etc/startup.sh; tail -f /var/log/slurmctld.log"]
+CMD ["/bin/sh", "-c", "/etc/startup.sh; service ssh start; tail -f /var/log/slurmctld.log"]
