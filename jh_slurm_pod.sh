@@ -7,7 +7,7 @@ USAGE='./jh_slurm_pod.sh {up|down}'
 : ${JUPYTERUSER:=root}
 : ${JUPYTERUSER_UID:=0}
 : ${JUPYTERGROUP:=root}
-: ${JUPYTERGROUP_UID:=0}
+: ${JUPYTERGROUP_GID:=0}
 
 # Get user and group for Slurm container volume from environment, or set defaults
 : ${SLURMUSER:=slurm}
