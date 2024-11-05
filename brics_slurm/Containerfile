@@ -17,4 +17,7 @@ RUN cat > /etc/ssh/sshd_config.d/disable_password_authentication.conf <<EOF
 PasswordAuthentication no
 EOF
 
+# Update SSHD_OPTS to set custom log output file for sshd service
+RUN sed -E -i -e 's#^SSHD_OPTS=$#&"-E /var/log/sshd.log"#' /etc/default/ssh
+
 CMD ["/bin/sh", "-c", "/etc/startup.sh; service ssh start; tail -f /var/log/slurmctld.log"]
