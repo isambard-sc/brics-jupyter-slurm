@@ -71,6 +71,7 @@ function bring_pod_up {
       --gname ${SLURMGROUP} --gid ${SLURMGROUP_GID} \
       --file - . | podman machine ssh podman volume import slurm_root -
   else
+    # TODO update GNU tar command to exclude .gitkeep and set UID/GID for files in archive
     tar --cd brics_slurm_root/ --create --file - . | podman volume import slurm_root -
   fi
   
