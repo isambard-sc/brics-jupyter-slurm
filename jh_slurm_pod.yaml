@@ -39,6 +39,12 @@ spec:
       image: localhost/brics_slurm:latest
 
       volumeMounts:
+        # sshd log file
+        - name: slurm_root_vol
+          mountPath: /var/log/sshd.log
+          readOnly: false
+          subPath: /var/log/sshd.log
+
         # slurmctld log file
         - name: slurm_root_vol
           mountPath: /var/log/slurmctld.log
