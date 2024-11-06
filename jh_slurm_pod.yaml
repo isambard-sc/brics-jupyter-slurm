@@ -30,10 +30,17 @@ spec:
           readOnly: false
           subPath: /var/log/jupyterhub
 
-        # SSH key from Secret
+        # SSH client private key from Secret
         - name: ssh_client_key_vol
-          mountPath: /srv/jupyterhub/ssh
+          mountPath: /srv/jupyterhub/ssh_key
           readOnly: true
+          subPath: ssh_key
+
+        # SSH client public key from Secret
+        - name: ssh_client_key_vol
+          mountPath: /srv/jupyterhub/ssh_key.pub
+          readOnly: true
+          subPath: ssh_key.pub
 
     - name: slurm
       image: localhost/brics_slurm:latest
@@ -69,6 +76,18 @@ spec:
           readOnly: false
           subPath: /var/spool/slurmd
 
+        # SSH host private key from Secret
+        - name: ssh_host_key_vol
+          mountPath: /etc/ssh/ssh_host_ed25519_key
+          readOnly: true
+          subPath: ssh_key
+
+        # SSH host public key from Secret
+        - name: ssh_host_key_vol
+          mountPath: /etc/ssh/ssh_host_ed25519_key.pub
+          readOnly: true
+          subPath: ssh_key.pub
+
   volumes:
     - name: jupyterhub_root_vol
       persistentVolumeClaim:
@@ -83,11 +102,10 @@ spec:
     - name: ssh_client_key_vol
       secret:
         secretName: jupyterhub-slurm-ssh-client-key
+        defaultMode: 0600
 
     - name: ssh_host_key_vol
       secret:
         secretName: jupyterhub-slurm-ssh-host-key
-
-
-
+        defaultMode: 0600
  

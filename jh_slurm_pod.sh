@@ -21,8 +21,7 @@ USAGE='./jh_slurm_pod.sh {up|down}'
 # arguments.
 #
 # The Secret will have 2 keys under stringData, containing the private and public
-# parts of the SSH key. The key names are derived from the filename passed as
-# first argument with the leading directory components stripped.
+# parts of the SSH key named ssh_key and ssh_key.pub 
 # 
 # Usage:
 #    make_ssh_key_secret <filename> <key comment> <secret name>
@@ -42,9 +41,9 @@ kind: Secret
 metadata:
   name: ${3}
 stringData:
-  $(basename ${1}): |
+  ssh_key: |
 $(cat ${1} | sed -E -e 's/^/    /')
-  $(basename ${1}.pub): |
+  ssh_key.pub: |
 $(cat ${1}.pub | sed -E -e 's/^/    /')
 immutable: true
 EOF
