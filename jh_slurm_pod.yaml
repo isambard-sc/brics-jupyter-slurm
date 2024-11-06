@@ -31,7 +31,7 @@ spec:
           subPath: /var/log/jupyterhub
 
         # SSH key from Secret
-        - name: ssh_key_vol
+        - name: ssh_client_key_vol
           mountPath: /srv/jupyterhub/ssh
           readOnly: true
 
@@ -80,9 +80,13 @@ spec:
         claimName: slurm_root
         readOnly: false
 
-    - name: ssh_key_vol
+    - name: ssh_client_key_vol
       secret:
-        secretName: jupyterhub-slurm-ssh-key
+        secretName: jupyterhub-slurm-ssh-client-key
+
+    - name: ssh_host_key_vol
+      secret:
+        secretName: jupyterhub-slurm-ssh-host-key
 
 
 

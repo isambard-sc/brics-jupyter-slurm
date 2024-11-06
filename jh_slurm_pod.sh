@@ -15,24 +15,37 @@ USAGE='./jh_slurm_pod.sh {up|down}'
 : ${SLURMGROUP=slurm}
 : ${SLURMGROUP_GID:=64030}
 
-# Creates an SSH key in the directory provided as an argument, then writes a 
-# K8s manifest for a Secret containing the key data to stdout
+# Creates a passwordless SSH key, then writes a K8s manifest for a Secret 
+# containing the key data to stdout. The filename for the key to be written, the
+# comment to add to the key, and name for the K8s Secret should be provided as
+# arguments.
+#
+# The Secret will have 2 keys under stringData, containing the private and public
+# parts of the SSH key. The key names are derived from the filename passed as
+# first argument with the leading directory components stripped.
+# 
+# Usage:
+#    make_ssh_key_secret <filename> <key comment> <secret name>
 function make_ssh_key_secret {
-  if [[ ! -d ${1} ]]; then
-    echo "Error: ${1} is not a directory"
+  if (( $# != 3 )); then
+    echo "Error: expected 3 arguments, but got $#"
     exit 1
   fi
-  ssh-keygen -t ed25519 -f ${1}/ssh_key -N "" -C "JupyterHub-Slurm dev environment" >/dev/null 2>&1
+  if [[ -a ${1} ]]; then
+    echo "Error: ${1} already exists"
+    exit 1
+  fi
+  ssh-keygen -t ed25519 -f "${1}" -N "" -C "${2}" >/dev/null 2>&1
   cat <<EOF
 apiVersion: core/v1
 kind: Secret
 metadata:
-  name: jupyterhub-slurm-ssh-key
+  name: ${3}
 stringData:
-  ssh_key: |
-$(cat ${BUILD_TMPDIR}/ssh_key | sed -E -e 's/^/    /')
-  ssh_key.pub: |
-$(cat ${BUILD_TMPDIR}/ssh_key.pub | sed -E -e 's/^/    /')
+  $(basename ${1}): |
+$(cat ${1} | sed -E -e 's/^/    /')
+  $(basename ${1}.pub): |
+$(cat ${1}.pub | sed -E -e 's/^/    /')
 immutable: true
 EOF
 }
@@ -85,9 +98,11 @@ function bring_pod_up {
       --file - . | podman volume import slurm_root -
   fi
   
-  # Create combined manifest file with Secret and Pod
+  # Create combined manifest file with generated Secrets and Pod
   cat > ${BUILD_TMPDIR}/combined.yaml <<EOF
-$(make_ssh_key_secret ${BUILD_TMPDIR})
+$(make_ssh_key_secret ${BUILD_TMPDIR}/ssh_key "JupyterHub-Slurm dev environment client key" "jupyterhub-slurm-ssh-client-key")
+---
+$(make_ssh_key_secret ${BUILD_TMPDIR}/ssh_host_ed25519_key "JupyterHub-Slurm dev environment host key" "jupyterhub-slurm-ssh-host-key")
 ---
 $(cat jh_slurm_pod.yaml)
 EOF
@@ -111,11 +126,13 @@ function tear_pod_down {
   # Delete podman named volume containing Slurm data
   podman volume rm slurm_root
 
-  # Delete podman secret containing SSH key
-  podman secret rm jupyterhub-slurm-ssh-key
+  # Delete podman secret and volume containing SSH client key
+  podman secret rm jupyterhub-slurm-ssh-client-key
+  podman volume rm jupyterhub-slurm-ssh-client-key
 
-  # Delete podman volume derived from Secret
-  podman volume rm jupyterhub-slurm-ssh-key
+  # Delete podman secret and volume containing SSH host key
+  podman secret rm jupyterhub-slurm-ssh-host-key
+  podman volume rm jupyterhub-slurm-ssh-host-key
 }
 
 # Validate number of arguments
