@@ -12,9 +12,10 @@ rm -rf /var/lib/apt/lists/*
 rm /etc/ssh/ssh_host_*
 EOF
 
-# Update sshd config to prevent password authentication
-RUN cat > /etc/ssh/sshd_config.d/disable_password_authentication.conf <<EOF
+# Update sshd config to prevent password auth and increase log verbosity
+RUN cat > /etc/ssh/sshd_config.d/custom.conf <<EOF
 PasswordAuthentication no
+LogLevel VERBOSE
 EOF
 
 # Update SSHD_OPTS to set custom log output file for sshd service
