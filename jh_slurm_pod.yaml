@@ -94,6 +94,12 @@ spec:
           readOnly: true
           subPath: ssh_key.pub
 
+        # authorized_keys file containing SSH client public key from Secret
+        - name: ssh_client_key_vol
+          mountPath: /home/jupyterspawner/.ssh/authorized_keys
+          readOnly: false # necessary to set correct permissions at runtime
+          subPath: localhost_authorized_keys
+
   volumes:
     - name: jupyterhub_root_vol
       persistentVolumeClaim:
