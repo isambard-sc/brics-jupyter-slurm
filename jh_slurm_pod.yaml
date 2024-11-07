@@ -42,6 +42,12 @@ spec:
           readOnly: true
           subPath: ssh_key.pub
 
+        # ssh_known_hosts file containing SSH host public key for Slurm container
+        - name: ssh_host_key_vol
+          mountPath: /etc/ssh/ssh_known_hosts
+          readOnly: true
+          subPath: localhost_known_hosts
+
     - name: slurm
       image: localhost/brics_slurm:latest
 
