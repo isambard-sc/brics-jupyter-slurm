@@ -21,7 +21,15 @@ USAGE='./jh_slurm_pod.sh {up|down}'
 # arguments.
 #
 # The Secret will have 2 keys under stringData, containing the private and public
-# parts of the SSH key named ssh_key and ssh_key.pub 
+# parts of the SSH key named ssh_key and ssh_key.pub. 
+
+# 2 additional entries are present included for convenience:
+# 
+# * A key named localhost_known_hosts contains an OpenSSH ssh_known_hosts-format
+#   entry for localhost (hostname and IPv4/IPv6 addresses) with the public key. 
+# * A key named localhost_authorized_keys contains and OpenSSH 
+#   authorized_keys-format entry containing the public key restricted for access
+#   from localhost (hostname and IPv4/IPv6 addresses) 
 # 
 # Usage:
 #    make_ssh_key_secret <filename> <key comment> <secret name>
@@ -45,6 +53,10 @@ stringData:
 $(cat ${1} | sed -E -e 's/^/    /')
   ssh_key.pub: |
 $(cat ${1}.pub | sed -E -e 's/^/    /')
+  localhost_known_hosts: |
+$(cat <(printf "%s" "localhost,127.0.0.1,::1 ") ${1}.pub | sed -E -e 's/^/    /')
+  localhost_authorized_keys: |
+$(cat <(printf "%s" 'from="localhost,127.0.0.1,::1" ') ${1}.pub | sed -E -e 's/^/    /')
 immutable: true
 EOF
 }
