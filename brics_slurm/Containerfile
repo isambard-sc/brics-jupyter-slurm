@@ -1,12 +1,15 @@
 FROM docker.io/nathanhess/slurm:full-root
 
-# Install OpenSSH server package from distribution repos and remove
-# auto-generated SSH host keys. SSH host keys should be generated on container
-# startup or mounted into the container to prevent fixed keys from being baked
-# into the container image.
+# Install packages from from distribution repos
+# * OpenSSH server
+# * sudo
+# Also remove SSH host keys auto-generated during install. SSH host keys should 
+# be generated on container startup or mounted into the container to prevent
+# fixed keys from being baked into the container image.
 RUN <<EOF
 apt-get update && apt-get install --assume-yes --no-install-recommends \
-  openssh-server
+  openssh-server \
+  sudo
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 rm /etc/ssh/ssh_host_*
@@ -29,6 +32,10 @@ RUN useradd --create-home \
   --user-group \ 
   --shell /bin/bash \
   jupyterspawner
+
+# Install sudoers configuration to enable jupyterspawner to run certain commands
+# without a password
+# TODO
 
 # Add script to fix permissions and ownership on SSH key data mounted into container
 RUN cat > /usr/local/sbin/fix_ssh_perms.sh <<EOF
