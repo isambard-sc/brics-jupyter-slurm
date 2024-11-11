@@ -208,7 +208,11 @@ c.BricsSlurmSpawner.batch_cancel_cmd = "SLURMSPAWNER_JOB_ID={{job_id}} " + f"{SL
 # Based on default for SlurmSpawner
 # https://github.com/jupyterhub/batchspawner/blob/fe5a893eaf9eb5e121cbe36bad2e69af798e6140/batchspawner/batchspawner.py#L675
 c.BricsSlurmSpawner.batch_script = """#!/bin/bash
+#SBATCH --output={{homedir}}/jupyterhub_slurmspawner_%j.log
 #SBATCH --job-name=spawner-jupyterhub
+#SBATCH --chdir={{homedir}}
+#SBATCH --export={{keepvars}}
+#SBATCH --get-user-env=L
 {% if partition  %}#SBATCH --partition={{partition}}
 {% endif %}{% if runtime    %}#SBATCH --time={{runtime}}
 {% endif %}{% if memory     %}#SBATCH --mem={{memory}}
