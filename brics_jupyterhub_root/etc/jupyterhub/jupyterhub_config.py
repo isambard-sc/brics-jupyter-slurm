@@ -35,8 +35,8 @@ DUMMY_USERNAME="testuser"
 # that can be passed to the Spawner class as auth_state to mock the behaviour of
 # BricsAuthenticator without receiving a JWT.
 DUMMY_AUTH_STATE={
-    "project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
     "project1": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
+    "project2": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
     "another_project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
     "also-a-project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
 }
@@ -180,7 +180,7 @@ c.BricsSlurmSpawner.exec_prefix = " ".join(SSH_CMD)
 # considered a single argument but might be split by the shell should be
 # double-quoted, so that only the outer quotes are removed when the
 # `ssh ... <cmd>` is processed by the shell.
-SLURMSPAWNER_WRAPPERS_BIN="/tools/brics/admin/jupyterspawner/venvs/slurmspawner_wrappers/bin"
+SLURMSPAWNER_WRAPPERS_BIN="/opt/slurmspawner_wrappers/bin"
 c.BricsSlurmSpawner.batch_submit_cmd = " ".join(
     [
         "{% for var in keepvars.split(',') %}{{var}}=\"'${{'{'}}{{var}}{{'}'}}'\" {% endfor %}",
@@ -217,7 +217,7 @@ c.BricsSlurmSpawner.batch_script = """#!/bin/bash
 {% endif %}{% if runtime    %}#SBATCH --time={{runtime}}
 {% endif %}{% if memory     %}#SBATCH --mem={{memory}}
 {% endif %}{% if gres       %}#SBATCH --gres={{gres}}
-{% endif %}{% if ngpus      %}#SBATCH --gpus={{ngpus}}
+{% endif %}{% if ngpus      %}##SBATCH --gpus={{ngpus}}  # NOTE: --gpus disabled in Slurm dev environment
 {% endif %}{% if nprocs     %}#SBATCH --cpus-per-task={{nprocs}}
 {% endif %}{% if reservation%}#SBATCH --reservation={{reservation}}
 {% endif %}{% if options    %}#SBATCH {{options}}{% endif %}

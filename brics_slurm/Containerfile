@@ -36,9 +36,24 @@ RUN sed -E -i -e 's#^SSHD_OPTS=$#&"-E /var/log/sshd.log"#' /etc/default/ssh
 RUN useradd --create-home \
   --comment "JupyterHub job spawning service account" \
   --home-dir /home/jupyterspawner \
-  --user-group \ 
+  --user-group \
   --shell /bin/bash \
   jupyterspawner
+
+# Create jupyterusers group
+RUN groupadd jupyterusers
+
+# Create a test user with Isambard-style username and home directory path, and
+# add to jupyterusers group
+# Note the user is created without a password, but jupyterspawner is able run
+# commands on behalf of the user using `sudo` via a sudoers policy (below) 
+RUN useradd --create-home \
+  --comment "Test User" \
+  --home-dir /home/project1/testuser.project1 \
+  --user-group \
+  --shell /bin/bash \
+  --groups jupyterusers \
+  testuser.project1
 
 # Install sudoers configuration to enable jupyterspawner to run
 # slurmspawner_wrappers scripts on behalf of users in jupyterusers group without
