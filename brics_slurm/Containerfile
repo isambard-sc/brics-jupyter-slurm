@@ -17,8 +17,10 @@ EOF
 
 # Install slurmspawner_wrappers Python package in venv
 ENV SLURMSPAWNER_VENV_DIR=/opt/slurmspawner_wrappers
-# TODO Create venv and install package from public GitHub repository
-# RUN ...
+RUN <<EOF
+python3 -m venv --upgrade-deps ${SLURMSPAWNER_VENV_DIR}
+${SLURMSPAWNER_VENV_DIR}/bin/python -m pip install "slurmspawner_wrappers @ git+https://github.com/isambard-sc/slurmspawner_wrappers.git"
+EOF
 
 # Update sshd config to prevent password auth and increase log verbosity
 RUN cat > /etc/ssh/sshd_config.d/custom.conf <<EOF
