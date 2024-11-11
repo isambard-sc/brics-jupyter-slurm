@@ -180,7 +180,7 @@ c.BricsSlurmSpawner.exec_prefix = " ".join(SSH_CMD)
 # considered a single argument but might be split by the shell should be
 # double-quoted, so that only the outer quotes are removed when the
 # `ssh ... <cmd>` is processed by the shell.
-SLURMSPAWNER_WRAPPERS_BIN="/opt/slurmspawner_wrappers/bin"
+SLURMSPAWNER_WRAPPERS_BIN="/opt/jupyter/slurmspawner_wrappers/bin"
 c.BricsSlurmSpawner.batch_submit_cmd = " ".join(
     [
         "{% for var in keepvars.split(',') %}{{var}}=\"'${{'{'}}{{var}}{{'}'}}'\" {% endfor %}",

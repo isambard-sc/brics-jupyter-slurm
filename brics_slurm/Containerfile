@@ -15,8 +15,12 @@ rm -rf /var/lib/apt/lists/*
 rm /etc/ssh/ssh_host_*
 EOF
 
+# Create directory for installing supporting tools and data for Jupyter
+ENV OPT_JUPYTER_DIR=/opt/jupyter
+RUN mkdir -p ${OPT_JUPYTER_DIR}
+
 # Install slurmspawner_wrappers Python package in venv
-ENV SLURMSPAWNER_VENV_DIR=/opt/slurmspawner_wrappers
+ENV SLURMSPAWNER_VENV_DIR=${OPT_JUPYTER_DIR}/slurmspawner_wrappers
 RUN <<EOF
 python3 -m venv --upgrade-deps ${SLURMSPAWNER_VENV_DIR}
 ${SLURMSPAWNER_VENV_DIR}/bin/python -m pip install "slurmspawner_wrappers @ git+https://github.com/isambard-sc/slurmspawner_wrappers.git"
