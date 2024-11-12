@@ -18,6 +18,14 @@ from bricsauthenticator import BricsAuthenticator
 from bricsspawner import BricsSlurmSpawner
 from jupyterhub.handlers import BaseHandler
 
+# The JupyterHub public proxy should listen on all interfaces, with a base URL
+# of /jupyter
+c.JupyterHub.bind_url = "http://:8000/jupyter"
+
+# The Hub API should listen on an IP address that can be reached by spawned
+# single-user servers
+c.JupyterHub.hub_bind_url = "http://127.0.0.1:8081"
+
 # BricsAuthenticator decodes claims from the JWT received in HTTP headers,
 # uses the short_name claim from the received JWT as the username of the
 # authenticated user, and passes the projects claim from the received JWT
