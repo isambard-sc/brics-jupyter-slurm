@@ -77,7 +77,7 @@ function bring_pod_up {
   fi
 
   # Build local container images
-  podman build -t brics_jupyterhub --target=stage-dev ./brics_jupyterhub
+  podman build -t brics_jupyterhub_dev --target=stage-dev ./brics_jupyterhub
   podman build -t brics_slurm ./brics_slurm
 
   # Create podman named volume containing JupyterHub data

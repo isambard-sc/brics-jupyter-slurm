@@ -59,9 +59,16 @@ CMD ["start-jupyterhub", "--debug"]
 # Modify the production image for development
 FROM stage-prod AS stage-dev
 
-RUN mkdir -p ${OPT_JUPYTER_DIR}/repos
+# Create directory to hold data for development (e.g. copies of local repos)
+ENV DEV_DATA_DIR=/root/dev_data
+RUN mkdir -p ${DEV_DATA_DIR}
 
-COPY _dev_build_data/bricsauthenticator ${OPT_JUPYTER_DIR}/repos/bricsauthenticator
+# Copy local clone of bricsauthenticator repo from host
+COPY _dev_build_data/bricsauthenticator ${DEV_DATA_DIR}/bricsauthenticator
 
-RUN python3 -m pip install --no-cache-dir --root-user-action=ignore \
-  "bricsauthenticator@git+file://${OPT_JUPYTER_DIR}/repos/bricsauthenticator[dev]"
+# Remove installed bricsauthenticator and replace with local version from host
+RUN <<EOF
+python3 -m pip uninstall --yes --root-user-action=ignore bricsauthenticator
+python3 -m pip install --no-cache-dir --root-user-action=ignore \
+  "bricsauthenticator[dev]@git+file://${DEV_DATA_DIR}/bricsauthenticator"
+EOF

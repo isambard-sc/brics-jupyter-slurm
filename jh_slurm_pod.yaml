@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: jupyterhub
-      image: localhost/brics_jupyterhub:latest
+      image: localhost/brics_jupyterhub_dev:latest
       ports:
         - containerPort: 8000
           hostIP: 127.0.0.1
