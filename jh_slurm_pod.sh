@@ -67,8 +67,17 @@ function bring_pod_up {
   BUILD_TMPDIR=$(mktemp -d _build_tmp/jh_slurm_pod.XXXXXXXXXX)
   echo "Temporary build data directory: ${BUILD_TMPDIR}"
 
+  # If not already present, clone repositories to be mounted into dev images
+  mkdir -p -v brics_jupyterhub/_dev_build_data
+  if [[ ! -d brics_jupyterhub/_dev_build_data/bricsauthenticator ]]; then
+    echo "Cloning fresh bricsauthenticator repository"
+    git clone https://github.com/isambard-sc/bricsauthenticator brics_jupyterhub/_dev_build_data/bricsauthenticator
+  else
+    echo "Skipping clone of bricsauthenticator: existing directory found"
+  fi
+
   # Build local container images
-  podman build -t brics_jupyterhub ./brics_jupyterhub
+  podman build -t brics_jupyterhub --target=stage-dev ./brics_jupyterhub
   podman build -t brics_slurm ./brics_slurm
 
   # Create podman named volume containing JupyterHub data

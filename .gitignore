@@ -14,3 +14,4 @@ jupyter_config/jupyterhub_cookie_secret
 jupyter_config/jupyterhub.sqlite
 
 /_build_tmp/
+/brics_jupyterhub/_dev_build_data/

@@ -1,4 +1,5 @@
-FROM quay.io/jupyterhub/jupyterhub:latest
+# BUILD PROD IMAGE
+FROM quay.io/jupyterhub/jupyterhub:latest AS stage-prod
 
 # Install packages from distribution repos
 RUN <<EOF
@@ -53,3 +54,14 @@ EOF
 WORKDIR ${JUPYTERHUB_SRV_DIR}
 
 CMD ["start-jupyterhub", "--debug"]
+
+# BUILD DEV IMAGE
+# Modify the production image for development
+FROM stage-prod AS stage-dev
+
+RUN mkdir -p ${OPT_JUPYTER_DIR}/repos
+
+COPY _dev_build_data/bricsauthenticator ${OPT_JUPYTER_DIR}/repos/bricsauthenticator
+
+RUN python3 -m pip install --no-cache-dir --root-user-action=ignore \
+  "bricsauthenticator@git+file://${OPT_JUPYTER_DIR}/repos/bricsauthenticator[dev]"
