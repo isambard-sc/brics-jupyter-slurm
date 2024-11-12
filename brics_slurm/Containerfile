@@ -77,12 +77,9 @@ RUN useradd --create-home \
 # slurmspawner_wrappers scripts on behalf of users in jupyterusers group without
 # a password, passing through environment variables required by the spawned 
 # single-user Jupyter server
-RUN cat > /etc/sudoers.d/00_jupyterspawner <<EOF
-Defaults:jupyterspawner env_keep += "SLURMSPAWNER_JOB_ID JUPYTERHUB_* JPY_API_TOKEN USER HOME SHELL"
-jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_sbatch
-jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_squeue
-jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_scancel
-EOF
+COPY --chmod=0600 jupyterspawner_sudoers /etc/sudoers.d/00_jupyterspawner
+# Use sed to insert the value of the environment variable SLURMSPAWNER_VENV_DIR
+RUN sed -E -i -e 's#\$\{SLURMSPAWNER_VENV_DIR\}#'"${SLURMSPAWNER_VENV_DIR}"'#' /etc/sudoers.d/00_jupyterspawner
 
 # Add script to fix permissions and ownership on SSH key data mounted into container
 RUN cat > /usr/local/sbin/fix_ssh_perms.sh <<EOF

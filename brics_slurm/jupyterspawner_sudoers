@@ -1,0 +1,4 @@
+Defaults:jupyterspawner env_keep += "SLURMSPAWNER_JOB_ID JUPYTERHUB_* JPY_API_TOKEN USER HOME SHELL"
+jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_sbatch
+jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_squeue
+jupyterspawner ALL=(%jupyterusers) NOPASSWD: ${SLURMSPAWNER_VENV_DIR}/bin/slurmspawner_scancel
