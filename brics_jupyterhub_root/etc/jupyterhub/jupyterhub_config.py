@@ -91,6 +91,15 @@ c.JupyterHub.spawner_class = BricsSlurmSpawner
 # server.
 c.Spawner.env_keep = []
 
+# Set environment variables to pass information through to the job submission
+# script environment/spawned Jupyter user server. The variables are prefixed
+# with JUPYTERHUB_* to ensure that they are passed through the `sudo` command
+# used to invoke `sbatch` (according to the sudoers policy)
+c.Spawner.environment = {
+    "JUPYTERHUB_BRICS_MINIFORGE_PREFIX_DIR": "/opt/jupyter/miniforge3",
+    "JUPYTERHUB_BRICS_OPT_JUPYTER_DIR": "/opt/jupyter"
+}
+
 # Default notebook directory is the user's home directory (`~` is expanded)
 c.Spawner.notebook_dir = '~/'
 
@@ -224,9 +233,9 @@ c.BricsSlurmSpawner.batch_script = """#!/bin/bash
 
 set -euo pipefail
 
-source /tools/brics/jupyter/miniforge3/bin/activate jupyter-user-env
+source ${JUPYTERHUB_BRICS_MINIFORGE_PREFIX_DIR}/bin/activate jupyter-user-env
 
-export JUPYTER_PATH=/tools/brics/jupyter/jupyter_data${JUPYTER_PATH:+:}${JUPYTER_PATH:-}
+export JUPYTER_PATH=${JUPYTERHUB_BRICS_OPT_JUPYTER_DIR}/jupyter_data${JUPYTER_PATH:+:}${JUPYTER_PATH:-}
 
 trap 'echo SIGTERM received' TERM
 {{prologue}}
