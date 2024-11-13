@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: jupyterhub
-      image: localhost/brics_jupyterhub_dev:latest
+      image: localhost/brics_jupyterhub:dev-latest
       ports:
         - containerPort: 8000
           hostIP: 127.0.0.1
@@ -49,7 +49,7 @@ spec:
           subPath: localhost_known_hosts
 
     - name: slurm
-      image: localhost/brics_slurm:latest
+      image: localhost/brics_slurm:dev-latest
 
       volumeMounts:
         # sshd log file

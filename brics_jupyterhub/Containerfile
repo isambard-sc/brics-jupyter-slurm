@@ -1,5 +1,5 @@
-# BUILD PROD IMAGE
-FROM quay.io/jupyterhub/jupyterhub:latest AS stage-prod
+# BUILD BASE IMAGE
+FROM quay.io/jupyterhub/jupyterhub:latest AS stage-base
 
 # Install packages from distribution repos
 RUN <<EOF
@@ -56,8 +56,10 @@ WORKDIR ${JUPYTERHUB_SRV_DIR}
 CMD ["start-jupyterhub", "--debug"]
 
 # BUILD DEV IMAGE
-# Modify the production image for development
-FROM stage-prod AS stage-dev
+# Modify the base image for development
+FROM stage-base AS stage-dev
+
+ENV CONTAINER_ENV="dev"
 
 # Create directory to hold data for development (e.g. copies of local repos)
 ENV DEV_DATA_DIR=/root/dev_data
@@ -69,6 +71,12 @@ COPY _dev_build_data/bricsauthenticator ${DEV_DATA_DIR}/bricsauthenticator
 # Remove installed bricsauthenticator and replace with local version from host
 RUN <<EOF
 python3 -m pip uninstall --yes --root-user-action=ignore bricsauthenticator
-python3 -m pip install --no-cache-dir --root-user-action=ignore \
-  "bricsauthenticator[dev]@git+file://${DEV_DATA_DIR}/bricsauthenticator"
+python3 -m pip install --no-cache-dir --root-user-action=ignore --editable \
+  "${DEV_DATA_DIR}/bricsauthenticator[dev]"
 EOF
+
+# BUILD PROD IMAGE
+# Modify the base image for production
+FROM stage-base AS stage-prod
+
+ENV CONTAINER_ENV="prod"

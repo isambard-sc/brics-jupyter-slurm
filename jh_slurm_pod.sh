@@ -71,14 +71,22 @@ function bring_pod_up {
   mkdir -p -v brics_jupyterhub/_dev_build_data
   if [[ ! -d brics_jupyterhub/_dev_build_data/bricsauthenticator ]]; then
     echo "Cloning fresh bricsauthenticator repository"
-    git clone https://github.com/isambard-sc/bricsauthenticator brics_jupyterhub/_dev_build_data/bricsauthenticator
+    git clone https://github.com/isambard-sc/bricsauthenticator.git brics_jupyterhub/_dev_build_data/bricsauthenticator
   else
     echo "Skipping clone of bricsauthenticator: existing directory found"
   fi
 
+  mkdir -p -v brics_slurm/_dev_build_data
+  if [[ ! -d brics_slurm/_dev_build_data/slurmspawner_wrappers ]]; then
+    echo "Cloning fresh slurmspawner_wrappers repository"
+    git clone https://github.com/isambard-sc/slurmspawner_wrappers.git brics_slurm/_dev_build_data/slurmspawner_wrappers
+  else
+    echo "Skipping clone of slurmspawner_wrappers: existing directory found"
+  fi
+
   # Build local container images
-  podman build -t brics_jupyterhub_dev --target=stage-dev ./brics_jupyterhub
-  podman build -t brics_slurm ./brics_slurm
+  podman build -t brics_jupyterhub:dev-latest --target=stage-dev ./brics_jupyterhub
+  podman build -t brics_slurm:dev-latest --target=stage-dev ./brics_slurm
 
   # Create podman named volume containing JupyterHub data
   podman volume create jupyterhub_root

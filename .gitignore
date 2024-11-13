@@ -15,3 +15,4 @@ jupyter_config/jupyterhub.sqlite
 
 /_build_tmp/
 /brics_jupyterhub/_dev_build_data/
+/brics_slurm/_dev_build_data/
