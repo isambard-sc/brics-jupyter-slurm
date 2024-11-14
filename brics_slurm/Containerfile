@@ -71,13 +71,7 @@ COPY --chmod=0600 jupyterspawner_sudoers /etc/sudoers.d/00_jupyterspawner
 RUN sed -E -i -e 's#\$\{SLURMSPAWNER_VENV_DIR\}#'"${SLURMSPAWNER_VENV_DIR}"'#' /etc/sudoers.d/00_jupyterspawner
 
 # Add script to fix permissions and ownership on SSH key data mounted into container
-RUN cat > /usr/local/sbin/fix_ssh_perms.sh <<EOF
-#!/bin/bash
-# Authorized keys for jupyterspawner user
-chown -R jupyterspawner:jupyterspawner /home/jupyterspawner/.ssh
-chmod u=rw,g=,o= /home/jupyterspawner/.ssh/authorized_keys
-EOF
-RUN chmod a+x /usr/local/sbin/fix_ssh_perms.sh
+COPY --chmod=0700 fix_ssh_perms.sh /usr/local/sbin/fix_ssh_perms.sh
 
 CMD ["/bin/sh", "-c", "/etc/startup.sh; /usr/local/sbin/fix_ssh_perms.sh; service ssh start; tail -f /var/log/slurmctld.log"]
 
