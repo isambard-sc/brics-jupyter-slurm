@@ -106,4 +106,3 @@ CMD ["/bin/sh", "-c", "/etc/startup.sh; /usr/local/sbin/fix_ssh_perms.sh; /usr/l
 FROM stage-base AS stage-prod
 
 ENV CONTAINER_ENV="prod"
-
