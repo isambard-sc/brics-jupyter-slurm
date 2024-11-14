@@ -62,7 +62,7 @@ FROM stage-base AS stage-dev
 ENV CONTAINER_ENV="dev"
 
 # Create directory to hold data for development (e.g. copies of local repos)
-ENV DEV_DATA_DIR=/root/dev_data
+ENV DEV_DATA_DIR=/srv/dev_data
 RUN mkdir -p ${DEV_DATA_DIR}
 
 # Copy local clone of bricsauthenticator repo from host
