@@ -36,18 +36,82 @@ c.JupyterHub.hub_bind_url = "http://127.0.0.1:8081"
 
 # DUMMY_USERNAME is a fixed username which looks like a decoded short_name claim
 # that can be passed to the Spawner class as auth_state to mock the behaviour of
-# BricsAuthenticator without receiving a JWT.
-DUMMY_USERNAME="testuser"
+# BricsAuthenticator without receiving a JWT. This is obtained from the
+# environment variable DEV_USER_CONFIG_DEFAULT_SHORT_NAME in the environment of the
+# JupyterHub process. The value of DEV_USER_CONFIG_DEFAULT_SHORT_NAME must
+# correspond to the <USER> component of one of the Unix usernames in
+# the DEV_USER_CONFIG_UNIX_USERNAMES environment variable.
+def get_short_name_claim_list() -> list[str]:
+    """
+    Return a list of strings that look like decoded short_name claims
+
+    Gets a whitespace-separated list of Unix usernames in the form
+    <USER>.<PROJECT> from DEV_USER_CONFIG_UNIX_USERNAMES in the environment or
+    raises RuntimeError.
+
+    Constructs the list of short_name claims as by extracting unique <USER>
+    values from the list of Unix usernames.
+    """
+    from os import environ
+    try:
+        unix_usernames = environ["DEV_USER_CONFIG_UNIX_USERNAMES"]
+    except KeyError as e:
+        raise RuntimeError("Environment variable DEV_USER_CONFIG_UNIX_USERNAMES must be set") from e
+
+    return list(set(unix_username.split(".")[0] for unix_username in unix_usernames.split()))
+
+def get_default_short_name_claim() -> str:
+    """
+    Return a string that looks like a decoded short_name claim
+
+    Gets a string from DEV_USER_CONFIG_DEFAULT_SHORT_NAME in the environment or
+    raises RuntimeError.
+
+    This value can be used as the fixed short_name claim to pass to
+    DummyBricsAuthenticator.
+    """
+    from os import environ
+    try:
+        return environ["DEV_USER_CONFIG_DEFAULT_SHORT_NAME"]
+    except KeyError as e:
+        raise RuntimeError("Environment variable DEV_USER_CONFIG_DEFAULT_SHORT_NAME must be set") from e
+
+DUMMY_USERNAME = get_default_short_name_claim()
+
+short_name_claims = get_short_name_claim_list()
+if DUMMY_USERNAME not in short_name_claims:
+    raise RuntimeError(f"The default short_name '{DUMMY_USERNAME}' is not present in the list of short_name values extracted from the environment: {short_name_claims}")
 
 # DUMMY_AUTH_STATE is a fixed dictionary which looks like a decoded project claim
 # that can be passed to the Spawner class as auth_state to mock the behaviour of
-# BricsAuthenticator without receiving a JWT.
-DUMMY_AUTH_STATE={
-    "project1": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
-    "project2": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
-    "another_project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
-    "also-a-project": ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"],
-}
+# BricsAuthenticator without receiving a JWT. This is generated using the list of
+# Unix usernames in the environment variable DEV_USER_CONFIG_UNIX_USERNAMES in
+# the environment of the JupyterHub process
+def get_projects_claim(username: str, infrastructures: list[str] = None) -> dict[str, list[str]]:
+    """
+    Return a dict that looks like a decoded projects claim for `username`
+
+    Gets a whitespace-separated list of Unix usernames in the form
+    <USER>.<PROJECT> from DEV_USER_CONFIG_UNIX_USERNAMES in the environment or
+    raises RuntimeError.
+
+    Constructs the projects claim as a dictionary mapping all <PROJECT> values
+    with corresponding <USER> == `username` to a default list of infrastructures.
+    """
+    from os import environ
+    if infrastructures is None:
+        infrastructures = ["slurm.aip1.isambard", "jupyter.aip1.isambard", "slurm.3.isambard"]
+
+    try:
+        unix_usernames = environ["DEV_USER_CONFIG_UNIX_USERNAMES"]
+    except KeyError as e:
+        raise RuntimeError("Environment variable DEV_USER_CONFIG_UNIX_USERNAMES must be set") from e
+
+    projects = [unix_username.split(".")[1] for unix_username in unix_usernames.split() if unix_username.split(".")[0] == username]
+
+    return {project: infrastructures for project in projects}
+
+DUMMY_AUTH_STATE = get_projects_claim(DUMMY_USERNAME)
 
 class DummyBricsLoginHandler(BaseHandler):
     """

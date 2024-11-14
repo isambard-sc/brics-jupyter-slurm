@@ -62,18 +62,6 @@ RUN useradd --create-home \
 # Create jupyterusers group
 RUN groupadd jupyterusers
 
-# Create a test user with Isambard-style username and home directory path, and
-# add to jupyterusers group
-# Note the user is created without a password, but jupyterspawner is able run
-# commands on behalf of the user using `sudo` via a sudoers policy (below) 
-RUN useradd --create-home \
-  --comment "Test User" \
-  --home-dir /home/project1/testuser.project1 \
-  --user-group \
-  --shell /bin/bash \
-  --groups jupyterusers \
-  testuser.project1
-
 # Install sudoers configuration to enable jupyterspawner to run
 # slurmspawner_wrappers scripts on behalf of users in jupyterusers group without
 # a password, passing through environment variables required by the spawned 
@@ -112,6 +100,12 @@ ${SLURMSPAWNER_VENV_DIR}/bin/python -m pip uninstall --yes --root-user-action=ig
 ${SLURMSPAWNER_VENV_DIR}/bin/python -m pip install --no-cache-dir --root-user-action=ignore --editable \
   "${DEV_DATA_DIR}/slurmspawner_wrappers[dev]"
 EOF
+
+# Copy script for creating test users in dev environment
+COPY --chmod=0700 create_dev_users.sh /usr/local/sbin/create_dev_users.sh
+
+# Execute test users creation script as part of default startup command
+CMD ["/bin/sh", "-c", "/etc/startup.sh; /usr/local/sbin/fix_ssh_perms.sh; /usr/local/sbin/create_dev_users.sh; service ssh start; tail -f /var/log/slurmctld.log"]
 
 # BUILD PROD IMAGE
 # Modify the base image for production
